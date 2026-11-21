@@ -45,11 +45,11 @@ export default function LoginPage() {
         <form className="mt-6 space-y-4" onSubmit={onSubmit}>
           <div>
             <label className="mb-1 block text-sm text-muted">E-mail</label>
-            <Input name="email" type="email" defaultValue="demo@marcaink.app" required />
+            <Input name="email" type="email" autoComplete="email" placeholder="seu@email.com" required />
           </div>
           <div>
             <label className="mb-1 block text-sm text-muted">Senha</label>
-            <Input name="password" type="password" defaultValue="demo12345" required />
+            <Input name="password" type="password" autoComplete="current-password" placeholder="••••••••" required />
           </div>
           {error && <p className="text-sm text-red-400">{error}</p>}
           <Button className="w-full" disabled={loading}>

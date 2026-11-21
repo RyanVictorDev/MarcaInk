@@ -56,11 +56,10 @@ export default function HomePage() {
             </Link>
             <Link href="/login">
               <Button size="lg" variant="outline">
-                Acessar painel demo
+                Entrar no painel
               </Button>
             </Link>
           </div>
-          <p className="mt-4 text-sm text-muted">Demo: demo@marcaink.app / demo12345</p>
         </div>
 
         <Card className="relative overflow-hidden border-accent/20">
