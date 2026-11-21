@@ -1,0 +1,25 @@
+# Dependencies
+web/node_modules/
+api/vendor/bundle/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+api/.env
+web/.env.local
+
+# Rails
+api/log/*
+api/tmp/*
+api/storage/*
+!api/log/.keep
+!api/tmp/.keep
+api/config/master.key
+
+# Next.js
+web/.next/
+web/out/
+
+# OS
+.DS_Store
