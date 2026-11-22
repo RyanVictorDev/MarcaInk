@@ -1,4 +1,12 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3041";
+function resolveApiUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (!raw) {
+    return "";
+  }
+  return raw.replace(/\/$/, "");
+}
+
+const API_URL = resolveApiUrl();
 
 export class ApiError extends Error {
   status: number;
@@ -12,6 +20,10 @@ export async function api<T>(
   path: string,
   options: RequestInit & { token?: string | null } = {}
 ): Promise<T> {
+  if (!API_URL) {
+    throw new ApiError("API não configurada para este ambiente.", 503);
+  }
+
   const { token, headers, ...rest } = options;
   const res = await fetch(`${API_URL}${path}`, {
     ...rest,

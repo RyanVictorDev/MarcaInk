@@ -29,7 +29,7 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-semibold">Dashboard</h1>
           <p className="text-muted">Visão rápida do estúdio</p>
         </div>
-        <Link href={data.public_booking_url} target="_blank">
+        <Link href={data.public_booking_url} target="_blank" rel="noopener noreferrer">
           <Button variant="outline">
             Ver página pública <ArrowUpRight className="h-4 w-4" />
           </Button>
