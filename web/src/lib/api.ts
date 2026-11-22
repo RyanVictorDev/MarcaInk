@@ -41,12 +41,17 @@ export async function api<T>(
   return data as T;
 }
 
+function publicStudioPath(slug: string, suffix = "") {
+  const safe = encodeURIComponent(slug.trim());
+  return `/api/v1/public/studios/${safe}${suffix}`;
+}
+
 export const publicApi = {
-  studio: (slug: string) => api<PublicStudioResponse>(`/api/v1/public/studios/${slug}`),
+  studio: (slug: string) => api<PublicStudioResponse>(publicStudioPath(slug)),
   slots: (slug: string, q: Record<string, string>) =>
-    api<{ slots: Slot[] }>(`/api/v1/public/studios/${slug}/slots?${new URLSearchParams(q)}`),
+    api<{ slots: Slot[] }>(`${publicStudioPath(slug)}/slots?${new URLSearchParams(q)}`),
   book: (slug: string, body: unknown) =>
-    api<{ appointment: BookedAppointment }>(`/api/v1/public/studios/${slug}/book`, {
+    api<{ appointment: BookedAppointment }>(`${publicStudioPath(slug)}/book`, {
       method: "POST",
       body: JSON.stringify({ booking: body }),
     }),

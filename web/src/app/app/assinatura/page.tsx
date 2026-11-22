@@ -19,11 +19,15 @@ export default function AssinaturaPage() {
   async function activate(plan: string) {
     const token = getToken();
     if (!token) return;
-    const res = await api<{ mode: string; message: string }>("/api/v1/billing/checkout", {
+    const res = await api<{ mode: string; message: string; checkout_url?: string }>("/api/v1/billing/checkout", {
       method: "POST",
       token,
       body: JSON.stringify({ plan }),
     });
+    if (res.mode === "abacate" && res.checkout_url) {
+      window.location.href = res.checkout_url;
+      return;
+    }
     setMessage(res.message);
     const me = await api<{ studio: Studio }>("/api/v1/studio", { token });
     setStudio(me.studio);
@@ -46,9 +50,7 @@ export default function AssinaturaPage() {
       </Card>
       <Card className="space-y-3">
         <p className="font-medium">Ativar com AbacatePay</p>
-        <p className="text-sm text-muted">
-          Em produção, redirecionamos para o checkout. Sem API key, ativamos em modo demonstração.
-        </p>
+        <p className="text-sm text-muted">Pagamento recorrente via AbacatePay (Pix ou cartão).</p>
         <div className="flex flex-wrap gap-2">
           {["solo", "studio", "pro"].map((plan) => (
             <Button key={plan} variant="outline" onClick={() => activate(plan)}>
