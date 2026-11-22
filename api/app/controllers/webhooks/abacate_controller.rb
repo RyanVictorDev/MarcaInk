@@ -5,13 +5,17 @@ module Webhooks
       event_id = payload["id"].presence || payload.dig("data", "id").presence || SecureRandom.uuid
       event_type = payload["event"].presence || payload["type"].presence || "unknown"
 
-      return head :ok if AbacateWebhookEvent.exists?(event_id: event_id)
+      AbacateWebhookEvent.transaction do
+        event = AbacateWebhookEvent.lock.find_by(event_id: event_id)
+        return head :ok if event&.processed_at.present?
 
-      event = AbacateWebhookEvent.create!(event_id: event_id, event_type: event_type, payload: payload)
+        event ||= AbacateWebhookEvent.create!(event_id: event_id, event_type: event_type, payload: payload)
+        handle_event(event_type, payload)
+        event.update!(processed_at: Time.current)
+      end
 
-      handle_event(event_type, payload)
-      event.update!(processed_at: Time.current)
-
+      head :ok
+    rescue ActiveRecord::RecordNotUnique
       head :ok
     end
 

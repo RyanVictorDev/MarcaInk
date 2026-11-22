@@ -13,7 +13,7 @@ const plans = [
 export default function HomePage() {
   return (
     <div className="mx-auto min-h-screen max-w-6xl px-6 pb-20 pt-8">
-      <header className="mb-16 flex items-center justify-between">
+      <header className="mb-16 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <Logo />
         <nav className="hidden gap-6 text-sm text-muted md:flex">
           <a href="#features" className="hover:text-foreground">
@@ -120,6 +120,13 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      <footer className="border-t border-card-border pt-8 text-center text-sm text-muted">
+        <Link href="/privacidade" className="text-accent hover:underline">
+          Política de privacidade
+        </Link>
+        <p className="mt-2">© {new Date().getFullYear()} MarcaInk</p>
+      </footer>
     </div>
   );
 }

@@ -22,6 +22,8 @@ export default function PublicBookingPage() {
   const [startsAt, setStartsAt] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [consent, setConsent] = useState(false);
 
   useEffect(() => {
     publicApi.studio(slug).then(setData).catch(() => setError("Estúdio não encontrado"));
@@ -40,8 +42,9 @@ export default function PublicBookingPage() {
 
   async function submitBooking(form: HTMLFormElement) {
     const fd = new FormData(form);
-    if (!serviceId || !artistId || !startsAt) return;
+    if (!serviceId || !artistId || !startsAt || submitting) return;
     setError("");
+    setSubmitting(true);
     try {
       await publicApi.book(slug, {
         service_id: serviceId,
@@ -55,6 +58,8 @@ export default function PublicBookingPage() {
       setDone(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível agendar");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -208,16 +213,32 @@ export default function PublicBookingPage() {
             <h2 className="font-medium">Seus dados</h2>
             <Input name="name" placeholder="Nome completo" required />
             <Input name="email" type="email" placeholder="E-mail" required />
-            <Input name="phone" placeholder="WhatsApp" required />
+            <Input name="phone" placeholder="WhatsApp (com DDD)" minLength={10} required />
             <Input name="notes" placeholder="Descreva a ideia da tattoo (opcional)" />
+            <label className="flex gap-2 text-xs text-muted">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                required
+              />
+              <span>
+                Autorizo o tratamento dos meus dados para agendamento, conforme a{" "}
+                <a href="/privacidade" className="text-accent underline" target="_blank" rel="noreferrer">
+                  política de privacidade
+                </a>
+                .
+              </span>
+            </label>
             <p className="text-xs text-muted">{data.studio.cancellation_policy}</p>
             {error && <p className="text-sm text-red-400">{error}</p>}
             <div className="flex gap-2">
               <Button type="button" variant="ghost" onClick={() => setStep(2)}>
                 Voltar
               </Button>
-              <Button className="flex-1" type="submit">
-                Confirmar agendamento
+              <Button className="flex-1" type="submit" disabled={!consent || submitting}>
+                {submitting ? "Confirmando..." : "Confirmar agendamento"}
               </Button>
             </div>
           </form>

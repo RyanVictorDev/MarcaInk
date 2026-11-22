@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Calendar, CreditCard, LayoutDashboard, LogOut, Scissors, Settings } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 import { Logo } from "@/components/logo";
+import { MobileNav } from "@/components/mobile-nav";
 import { Button } from "@/components/ui/button";
 import { api, Studio } from "@/lib/api";
 import { clearToken, getToken } from "@/lib/auth-store";
@@ -72,7 +73,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <LogOut className="h-4 w-4" /> Sair
         </Button>
       </aside>
-      <main className="min-w-0 flex-1">{children}</main>
+      <div className="min-w-0 flex-1 pb-20 md:pb-0">
+        <MobileNav />
+        <main>{children}</main>
+      </div>
     </div>
   );
 }

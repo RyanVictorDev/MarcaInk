@@ -7,6 +7,8 @@ class Appointment < ApplicationRecord
   before_validation :set_ends_at, on: :create
 
   validates :customer_name, :customer_email, :customer_phone, :starts_at, presence: true
+  validates :customer_email, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :customer_phone, length: { minimum: 10, maximum: 20 }
   validates :status, inclusion: { in: %w[pending confirmed completed cancelled no_show] }
   validates :source, inclusion: { in: %w[public manual] }
 

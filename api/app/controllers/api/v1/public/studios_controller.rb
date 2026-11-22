@@ -39,25 +39,12 @@ module Api
           service = studio.services.active.find(booking_params[:service_id])
           starts_at = Time.zone.parse(booking_params[:starts_at])
 
-          slot_end = starts_at + service.duration_minutes.minutes + studio.buffer_minutes.minutes
-          available = AvailabilityService.new(
-            studio: studio, artist: artist, service: service,
-            from_date: starts_at.to_date, to_date: starts_at.to_date
-          ).slots.any? { |s| Time.zone.parse(s[:starts_at]) == starts_at }
-
-          unless available
-            return render json: { error: "Horário não está mais disponível." }, status: :conflict
-          end
-
-          appointment = studio.appointments.create!(
-            booking_params.merge(
-              service: service,
-              artist: artist,
-              starts_at: starts_at,
-              ends_at: slot_end,
-              source: "public",
-              status: "confirmed"
-            )
+          appointment = BookingService.create_public!(
+            studio: studio,
+            artist: artist,
+            service: service,
+            starts_at: starts_at,
+            attrs: booking_params.except(:artist_id, :service_id, :starts_at)
           )
 
           render json: {
@@ -71,10 +58,15 @@ module Api
           }, status: :created
         rescue ActiveRecord::RecordInvalid => e
           render json: { error: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
+        rescue BookingService::SlotUnavailable => e
+          render json: { error: e.message }, status: :conflict
         end
 
         def cancel
           appointment = Appointment.find_by!(cancel_token: params[:token])
+          if appointment.status == "cancelled"
+            return render json: { message: "Agendamento já estava cancelado." }
+          end
           if appointment.starts_at < appointment.studio.cancellation_hours.hours.from_now
             return render json: { error: "Prazo de cancelamento expirado." }, status: :unprocessable_entity
           end
