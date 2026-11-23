@@ -40,11 +40,14 @@ Abra [http://127.0.0.1:3042](http://127.0.0.1:3042).
 
 ### Docker
 
-Sobe Postgres, API e frontend juntos. O banco fica só na rede do Compose (porta **5433** no host, para não bater com um Postgres local na 5432).
+Sobe Postgres, API e frontend juntos. Senha, segredo e portas ficam no `.env`.
 
 ```bash
+copy .env.example .env
 docker compose up --build
 ```
+
+No PowerShell, `copy .env.example .env`. No terminal Unix, `cp .env.example .env`. Troque `POSTGRES_PASSWORD` e `JWT_SECRET` antes de subir. A porta do banco no computador vem de `DB_PORT` (5433 por padrão, para não bater com um Postgres local na 5432).
 
 O site fica em [http://127.0.0.1:3042](http://127.0.0.1:3042) e a API em [http://127.0.0.1:3041](http://127.0.0.1:3041).
 
@@ -57,14 +60,7 @@ O site fica em [http://127.0.0.1:3042](http://127.0.0.1:3042) e a API em [http:/
 - Checkout: `POST /api/v1/billing/checkout` (com JWT)
 - Sem `ABACATEPAY_API_KEY`, o billing ativa em **modo demonstração** para desenvolvimento.
 
-Variáveis sugeridas (produção):
-
-```bash
-ABACATEPAY_API_KEY=
-ABACATEPAY_CHECKOUT_URL=
-JWT_SECRET=
-CORS_ORIGINS=https://seu-dominio.com
-```
+As variáveis ficam no `.env`. O modelo está em `.env.example`.
 
 ## Licença
 

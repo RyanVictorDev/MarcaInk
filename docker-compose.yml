@@ -2,15 +2,15 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: marcaink
-      POSTGRES_PASSWORD: marcaink
-      POSTGRES_DB: marcaink_development
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:?defina POSTGRES_DB no .env}
     ports:
-      - "5433:5432"
+      - "${DB_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U marcaink -d marcaink_development"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -21,14 +21,16 @@ services:
       dockerfile: Dockerfile.dev
     environment:
       DB_HOST: db
-      DB_USERNAME: marcaink
-      DB_PASSWORD: marcaink
-      DB_NAME: marcaink_development
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
       RAILS_ENV: development
-      JWT_SECRET: marcaink-dev-secret
-      CORS_ORIGINS: http://localhost:3042,http://127.0.0.1:3042
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3042,http://127.0.0.1:3042}
+      ABACATEPAY_API_KEY: ${ABACATEPAY_API_KEY:-}
+      ABACATEPAY_CHECKOUT_URL: ${ABACATEPAY_CHECKOUT_URL:-}
     ports:
-      - "3041:3041"
+      - "${API_PORT:-3041}:3041"
     depends_on:
       db:
         condition: service_healthy
@@ -44,11 +46,11 @@ services:
       context: ./web
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://127.0.0.1:3041
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?defina NEXT_PUBLIC_API_URL no .env}
     environment:
-      NEXT_PUBLIC_API_URL: http://127.0.0.1:3041
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     ports:
-      - "3042:3042"
+      - "${WEB_PORT:-3042}:3042"
     depends_on:
       api:
         condition: service_healthy
