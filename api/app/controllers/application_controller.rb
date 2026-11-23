@@ -11,6 +11,10 @@ class ApplicationController < ActionController::API
   end
 
   def unprocessable(exception)
-    render json: { error: exception.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
+    record = exception.record
+    render json: {
+      error: record.errors.full_messages.to_sentence(words_connector: ", ", two_words_connector: " e ", last_word_connector: " e "),
+      fields: record.errors.messages
+    }, status: :unprocessable_entity
   end
 end

@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: marcaink
+      POSTGRES_PASSWORD: marcaink
+      POSTGRES_DB: marcaink_development
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marcaink -d marcaink_development"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    environment:
+      DB_HOST: db
+      DB_USERNAME: marcaink
+      DB_PASSWORD: marcaink
+      DB_NAME: marcaink_development
+      RAILS_ENV: development
+      JWT_SECRET: marcaink-dev-secret
+      CORS_ORIGINS: http://localhost:3042,http://127.0.0.1:3042
+    ports:
+      - "3041:3041"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:3041/up"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://127.0.0.1:3041
+    environment:
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3041
+    ports:
+      - "3042:3042"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:

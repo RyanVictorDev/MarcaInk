@@ -10,9 +10,11 @@ const API_URL = resolveApiUrl();
 
 export class ApiError extends Error {
   status: number;
-  constructor(message: string, status: number) {
+  fields?: Record<string, string[]>;
+  constructor(message: string, status: number, fields?: Record<string, string[]>) {
     super(message);
     this.status = status;
+    this.fields = fields;
   }
 }
 
@@ -36,7 +38,7 @@ export async function api<T>(
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new ApiError(data.error ?? "Erro na requisição", res.status);
+    throw new ApiError(data.error ?? "Erro na requisição", res.status, data.fields);
   }
   return data as T;
 }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { api, Studio } from "@/lib/api";
 import { getToken } from "@/lib/auth-store";
+import { statusLabel } from "@/lib/utils";
 
 export default function AssinaturaPage() {
   const [studio, setStudio] = useState<Studio | null>(null);
@@ -40,7 +41,7 @@ export default function AssinaturaPage() {
       <h1 className="text-3xl font-semibold">Assinatura</h1>
       <Card>
         <p className="text-sm text-muted">Status</p>
-        <p className="mt-1 text-2xl font-semibold capitalize">{studio.subscription_status}</p>
+        <p className="mt-1 text-2xl font-semibold">{statusLabel(studio.subscription_status)}</p>
         <p className="mt-2 text-sm text-muted">
           Plano atual: <span className="text-foreground">{studio.plan}</span>
         </p>

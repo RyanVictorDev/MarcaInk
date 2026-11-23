@@ -1,13 +1,20 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Card } from "@/components/ui/card";
 
 export default function PrivacidadePage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
-      <Link href="/">
+      <div className="flex items-center justify-between gap-4">
         <Logo />
-      </Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link href="/" className="nav-ink text-sm">
+            Início
+          </Link>
+        </div>
+      </div>
       <h1 className="mt-8 text-3xl font-semibold">Política de Privacidade (LGPD)</h1>
       <p className="mt-2 text-sm text-muted">Última atualização: novembro de 2026</p>
 

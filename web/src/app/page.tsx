@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { ArrowRight, Calendar, CreditCard, Sparkles, Users } from "lucide-react";
+import { HomeHeader } from "@/components/home-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Logo } from "@/components/logo";
 
 const plans = [
   { name: "Solo", price: "R$ 69", artists: "1 tatuador", highlight: false },
@@ -12,33 +11,12 @@ const plans = [
 
 export default function HomePage() {
   return (
-    <div className="mx-auto min-h-screen max-w-6xl px-6 pb-20 pt-8">
-      <header className="mb-16 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Logo />
-        <nav className="hidden gap-6 text-sm text-muted md:flex">
-          <a href="#features" className="hover:text-foreground">
-            Recursos
-          </a>
-          <a href="#pricing" className="hover:text-foreground">
-            Planos
-          </a>
-          <Link href="/s/black-needle" className="hover:text-foreground">
-            Demo pública
-          </Link>
-        </nav>
-        <div className="flex gap-2">
-          <Link href="/login">
-            <Button variant="ghost">Entrar</Button>
-          </Link>
-          <Link href="/register">
-            <Button>Começar grátis</Button>
-          </Link>
-        </div>
-      </header>
-
+    <div className="min-h-screen pb-20">
+      <HomeHeader />
+      <div className="mx-auto max-w-6xl px-6">
       <section className="mb-24 grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-        <div>
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-card-border bg-card px-3 py-1 text-xs text-muted">
+        <div className="stencil-in">
+          <p className="hero-chip mb-4 inline-flex items-center gap-2 rounded-full border border-card-border bg-card px-3 py-1 text-xs text-muted">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
             Feito para estúdios de tatuagem no Brasil
           </p>
@@ -49,31 +27,27 @@ export default function HomePage() {
             MarcaInk une link público de agendamento, painel do estúdio e assinatura recorrente com AbacatePay — Pix e cartão.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/register">
-              <Button size="lg">
-                Testar 14 dias <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button size="lg" variant="outline">
-                Entrar no painel
-              </Button>
-            </Link>
+            <Button href="/register" size="lg">
+              Testar 14 dias <ArrowRight className="h-4 w-4" />
+            </Button>
+            <Button href="/login" size="lg" variant="outline">
+              Entrar no painel
+            </Button>
           </div>
         </div>
 
-        <Card className="relative overflow-hidden border-accent/20">
+        <Card className="ink-frame hover-card stencil-in relative overflow-hidden border-accent/20" style={{ animationDelay: "120ms" }}>
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-accent/10 blur-3xl" />
           <p className="text-xs uppercase tracking-[0.2em] text-muted">Painel — hoje</p>
           <p className="mt-2 text-3xl font-semibold">6 sessões</p>
           <p className="text-sm text-muted">2 consultas · 3 tatuagens · 1 retoque</p>
-          <div className="mt-3 flex w-full items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-300">
+          <div className="mt-3 flex w-full items-center gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-2.5 text-sm text-success">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
             Link público ativo · /s/seu-studio
           </div>
           <div className="mt-6 space-y-3 border-t border-card-border pt-6">
             {["14:00 — Consulta · Ana", "16:30 — Sessão costas · Luna", "19:00 — Retoque · Bruno"].map((row) => (
-              <div key={row} className="flex items-center justify-between rounded-xl bg-black/40 px-4 py-3 text-sm">
+              <div key={row} className="session-row flex items-center justify-between rounded-xl bg-surface-muted px-4 py-3 text-sm">
                 <span>{row}</span>
                 <span className="text-accent">confirmado</span>
               </div>
@@ -88,7 +62,7 @@ export default function HomePage() {
           { icon: Users, title: "Duas visões", text: "Painel do dono e fluxo público mobile-first para o cliente." },
           { icon: CreditCard, title: "AbacatePay", text: "Assinatura mensal com Pix Automático e cartão recorrente." },
         ].map(({ icon: Icon, title, text }) => (
-          <Card key={title}>
+          <Card key={title} className="hover-card">
             <Icon className="mb-3 h-5 w-5 text-accent" />
             <h3 className="font-semibold">{title}</h3>
             <p className="mt-2 text-sm text-muted">{text}</p>
@@ -103,7 +77,7 @@ export default function HomePage() {
           {plans.map((plan) => (
             <Card
               key={plan.name}
-              className={plan.highlight ? "border-accent/50 shadow-[0_0_40px_-12px_#f59e0b80]" : undefined}
+              className={plan.highlight ? "hover-card border-accent/50 shadow-[0_0_40px_-12px_var(--accent)]" : "hover-card"}
             >
               <p className="text-sm text-muted">{plan.name}</p>
               <p className="mt-2 text-3xl font-semibold">
@@ -111,22 +85,21 @@ export default function HomePage() {
                 <span className="text-base font-normal text-muted">/mês</span>
               </p>
               <p className="mt-2 text-sm text-muted">{plan.artists}</p>
-              <Link href="/register" className="mt-6 block">
-                <Button className="w-full" variant={plan.highlight ? "primary" : "outline"}>
-                  Escolher {plan.name}
-                </Button>
-              </Link>
+              <Button href="/register" className="mt-6 w-full" variant={plan.highlight ? "primary" : "outline"}>
+                Escolher {plan.name}
+              </Button>
             </Card>
           ))}
         </div>
       </section>
 
       <footer className="border-t border-card-border pt-8 text-center text-sm text-muted">
-        <Link href="/privacidade" className="text-accent hover:underline">
+        <a href="/privacidade" className="nav-ink text-accent">
           Política de privacidade
-        </Link>
+        </a>
         <p className="mt-2">© {new Date().getFullYear()} MarcaInk</p>
       </footer>
+      </div>
     </div>
   );
 }

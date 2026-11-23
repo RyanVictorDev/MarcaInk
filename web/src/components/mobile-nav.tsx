@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Calendar, CreditCard, LayoutDashboard, Menu, Scissors, Settings, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -23,6 +24,8 @@ export function MobileNav() {
   <>
     <header className="sticky top-0 z-40 mb-4 flex items-center justify-between rounded-2xl border border-card-border bg-card/90 p-3 backdrop-blur md:hidden">
       <Logo className="text-base" />
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
       <button
         type="button"
         aria-label={open ? "Fechar menu" : "Abrir menu"}
@@ -31,6 +34,7 @@ export function MobileNav() {
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
+      </div>
     </header>
 
     {open && (

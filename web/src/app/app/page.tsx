@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { api, DashboardData } from "@/lib/api";
 import { getToken } from "@/lib/auth-store";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, statusLabel } from "@/lib/utils";
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -60,7 +60,7 @@ export default function DashboardPage() {
             <p className="text-sm text-muted">Nenhum agendamento futuro. Compartilhe seu link público.</p>
           )}
           {data.upcoming.map((a) => (
-            <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-black/35 px-4 py-3 text-sm">
+            <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-muted px-4 py-3 text-sm">
               <div>
                 <p className="font-medium">{a.customer_name}</p>
                 <p className="text-muted">
@@ -69,7 +69,7 @@ export default function DashboardPage() {
               </div>
               <div className="text-right">
                 <p>{formatDateTime(a.starts_at)}</p>
-                <p className="text-accent">{a.status}</p>
+                <p className="text-accent">{statusLabel(a.status)}</p>
               </div>
             </div>
           ))}

@@ -23,8 +23,6 @@ module Api
 
         user = studio.users.find_by!(role: "owner")
         render json: auth_payload(user), status: :created
-      rescue ActiveRecord::RecordInvalid => e
-        render json: { error: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
       end
 
       def login

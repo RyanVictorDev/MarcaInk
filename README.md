@@ -38,6 +38,16 @@ npm run dev
 
 Abra [http://127.0.0.1:3042](http://127.0.0.1:3042).
 
+### Docker
+
+Sobe Postgres, API e frontend juntos. O banco fica só na rede do Compose (porta **5433** no host, para não bater com um Postgres local na 5432).
+
+```bash
+docker compose up --build
+```
+
+O site fica em [http://127.0.0.1:3042](http://127.0.0.1:3042) e a API em [http://127.0.0.1:3041](http://127.0.0.1:3041).
+
 **Conta demo:** `demo@marcaink.app` / `demo12345`  
 **Agenda pública:** `/s/black-needle`
 

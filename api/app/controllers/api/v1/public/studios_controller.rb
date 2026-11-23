@@ -56,8 +56,6 @@ module Api
               studio_name: studio.name
             }
           }, status: :created
-        rescue ActiveRecord::RecordInvalid => e
-          render json: { error: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
         rescue BookingService::SlotUnavailable => e
           render json: { error: e.message }, status: :conflict
         end
