@@ -58,11 +58,21 @@ export default function PublicBookingPage() {
 
   useEffect(() => {
     if (!serviceId || !artistId) return;
+    let cancelled = false;
+    setSlots([]);
+    setStartsAt(null);
     const from = new Date().toISOString().slice(0, 10);
     publicApi
       .slots(slug, { artist_id: String(artistId), service_id: String(serviceId), from })
-      .then((r) => setSlots(r.slots))
-      .catch(() => setSlots([]));
+      .then((r) => {
+        if (!cancelled) setSlots(r.slots);
+      })
+      .catch(() => {
+        if (!cancelled) setSlots([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [slug, serviceId, artistId]);
 
   function errorsFor(values: Customer, accepted: boolean) {

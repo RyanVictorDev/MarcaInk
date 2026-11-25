@@ -18,6 +18,14 @@ Rails.application.routes.draw do
       resources :services, except: [ :show ]
       resources :artists, only: [ :index, :create, :update, :destroy ]
       resources :appointments, only: [ :index, :create, :update ]
+      resources :notifications, only: [ :index ] do
+        collection do
+          post :read_all
+        end
+        member do
+          post :read
+        end
+      end
       post "billing/checkout", to: "billing#checkout"
 
       namespace :public do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_25_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_25_223000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -44,17 +44,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_200000) do
     t.index ["cancel_token"], name: "index_appointments_on_cancel_token", unique: true
     t.index ["service_id"], name: "index_appointments_on_service_id"
     t.index ["studio_id", "starts_at"], name: "index_appointments_on_studio_id_and_starts_at"
+    t.index ["studio_id", "status", "starts_at"], name: "index_appointments_on_studio_status_starts"
     t.index ["studio_id"], name: "index_appointments_on_studio_id"
-  end
-
-  create_table "closed_days", force: :cascade do |t|
-    t.bigint "studio_id", null: false
-    t.date "day", null: false
-    t.string "note"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["studio_id", "day"], name: "index_closed_days_on_studio_id_and_day", unique: true
-    t.index ["studio_id"], name: "index_closed_days_on_studio_id"
   end
 
   create_table "blocks", force: :cascade do |t|
@@ -67,6 +58,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_200000) do
     t.datetime "updated_at", null: false
     t.index ["artist_id"], name: "index_blocks_on_artist_id"
     t.index ["studio_id"], name: "index_blocks_on_studio_id"
+  end
+
+  create_table "closed_days", force: :cascade do |t|
+    t.bigint "studio_id", null: false
+    t.date "day", null: false
+    t.string "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["studio_id", "day"], name: "index_closed_days_on_studio_id_and_day", unique: true
+    t.index ["studio_id"], name: "index_closed_days_on_studio_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "studio_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "appointment_id", null: false
+    t.string "kind", default: "booking", null: false
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["appointment_id"], name: "index_notifications_on_appointment_id"
+    t.index ["studio_id"], name: "index_notifications_on_studio_id"
+    t.index ["user_id", "created_at"], name: "index_notifications_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_notifications_on_unread_user", where: "(read_at IS NULL)"
   end
 
   create_table "services", force: :cascade do |t|
@@ -109,10 +124,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_200000) do
     t.string "role", default: "artist", null: false
     t.string "color", default: "#d97706", null: false
     t.boolean "active", default: true, null: false
-    t.boolean "account_owner", default: false, null: false
-    t.boolean "bookable", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "account_owner", default: false, null: false
+    t.boolean "bookable", default: true, null: false
     t.index ["studio_id", "email"], name: "index_users_on_studio_id_and_email", unique: true
     t.index ["studio_id"], name: "index_users_on_studio_id"
   end
@@ -130,12 +145,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_200000) do
     t.index ["studio_id"], name: "index_working_hours_on_studio_id"
   end
 
-  add_foreign_key "closed_days", "studios"
   add_foreign_key "appointments", "services"
   add_foreign_key "appointments", "studios"
   add_foreign_key "appointments", "users", column: "artist_id"
   add_foreign_key "blocks", "studios"
   add_foreign_key "blocks", "users", column: "artist_id"
+  add_foreign_key "closed_days", "studios"
+  add_foreign_key "notifications", "appointments", on_delete: :cascade
+  add_foreign_key "notifications", "studios", on_delete: :cascade
+  add_foreign_key "notifications", "users", on_delete: :cascade
   add_foreign_key "services", "studios"
   add_foreign_key "users", "studios"
   add_foreign_key "working_hours", "studios"

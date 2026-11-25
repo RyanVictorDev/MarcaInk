@@ -3,13 +3,23 @@ module Api
     class AppointmentsController < ApplicationController
       before_action :authenticate!
 
+      PER_PAGE = 20
+      PERIODS = %w[upcoming past all].freeze
+      STATUSES = %w[pending confirmed completed cancelled no_show].freeze
+
       def index
-        scope = visible_appointments.includes(:artist, :service).order(starts_at: :desc)
-        scope = scope.where(status: params[:status]) if params[:status].present?
-        if params[:from].present? && params[:to].present?
-          scope = scope.where(starts_at: Time.zone.parse(params[:from])..Time.zone.parse(params[:to]))
-        end
-        render json: { appointments: scope.limit(200).map { |a| appointment_json(a) } }
+        scope = filtered_appointments
+        total = scope.count
+        page = page_number(total)
+        rows = scope.includes(:artist, :service).order(starts_at: period == "upcoming" ? :asc : :desc).offset((page - 1) * PER_PAGE).limit(PER_PAGE)
+        render json: {
+          appointments: rows.map { |appointment| appointment_json(appointment) },
+          page: page,
+          per_page: PER_PAGE,
+          total: total,
+          total_pages: (total.to_f / PER_PAGE).ceil,
+          artists: artist_options
+        }
       end
 
       def create
@@ -35,6 +45,43 @@ module Api
         scope = current_studio.appointments
         scope = scope.where(artist_id: current_user.id) if current_user.artist?
         scope
+      end
+
+      def filtered_appointments
+        scope = visible_appointments
+        scope = scope.where(status: params[:status]) if STATUSES.include?(params[:status])
+        scope = scope.where(artist_id: params[:artist_id]) if current_user.manager? && params[:artist_id].present?
+        scope = case period
+        when "past" then scope.where(starts_at: ...Time.current)
+        when "all" then scope
+        else scope.where(starts_at: Time.current..)
+        end
+        query = params[:q].to_s.strip.first(80)
+        if query.present?
+          term = "%#{ActiveRecord::Base.sanitize_sql_like(query)}%"
+          scope = scope.where("customer_name ILIKE ?", term)
+        end
+        scope
+      end
+
+      def period
+        PERIODS.include?(params[:period]) ? params[:period] : "upcoming"
+      end
+
+      def page_number(total)
+        page = params[:page].to_i
+        page = 1 if page < 1
+        pages = (total.to_f / PER_PAGE).ceil
+        return 1 if pages.zero?
+        [ page, pages ].min
+      end
+
+      def artist_options
+        return [] unless current_user.manager?
+
+        current_studio.users.where(id: visible_appointments.select(:artist_id)).order(:name).map do |user|
+          { id: user.id, name: user.name }
+        end
       end
 
       def manual_params

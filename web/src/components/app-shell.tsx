@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Calendar, CreditCard, LayoutDashboard, LogOut, Scissors, Settings, Users } from "lucide-react";
 import { ReactNode, useEffect } from "react";
+import { BookingAlertsButton, BookingAlertsProvider } from "@/components/booking-alerts";
 import { Logo } from "@/components/logo";
 import { MobileNav } from "@/components/mobile-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -36,6 +37,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <ToastProvider>
+    <BookingAlertsProvider>
     <div className="flex h-dvh gap-4 overflow-hidden p-3 sm:p-4">
       <aside className="hidden h-full w-64 shrink-0 flex-col rounded-2xl border border-card-border bg-card/60 p-4 md:flex">
         <Logo />
@@ -80,10 +82,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="app-scroll flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <MobileNav links={visible} />
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">
+          {allowed && (
+            <div className="mb-4 hidden justify-end md:flex">
+              <BookingAlertsButton />
+            </div>
+          )}
           {allowed ? children : null}
         </main>
       </div>
     </div>
+    </BookingAlertsProvider>
     </ToastProvider>
   );
 }

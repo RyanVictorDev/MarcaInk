@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { BookingAlertsButton } from "@/components/booking-alerts";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ export function MobileNav({ links }: { links: NavLink[] }) {
     <header className="sticky top-0 z-40 mb-4 flex items-center justify-between rounded-2xl border border-card-border bg-card/90 p-3 backdrop-blur md:hidden">
       <Logo className="text-base" />
       <div className="flex items-center gap-2">
+        <BookingAlertsButton />
         <ThemeToggle />
       <button
         type="button"

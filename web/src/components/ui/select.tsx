@@ -109,7 +109,7 @@ export function Select({ id, value, options, onChange, invalid, placeholder = "S
         }}
         onKeyDown={onKeyDown}
       >
-        <span className={selected ? undefined : "text-muted"}>{selected?.label ?? placeholder}</span>
+        <span className={cn("min-w-0 truncate", !selected && "text-muted")}>{selected?.label ?? placeholder}</span>
         <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted transition duration-200", open && "rotate-180 text-accent")} />
       </button>
       {open &&

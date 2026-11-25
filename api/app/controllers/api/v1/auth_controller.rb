@@ -116,7 +116,7 @@ module Api
         "Cancelamentos devem ser feitos com pelo menos 24h de antecedência. Sessões confirmadas podem exigir sinal."
       end
 
-      def seed_defaults!(studio, artist)
+      def seed_defaults!(studio, _artist)
         studio.services.create!([
           { name: "Consulta de projeto", kind: "consultation", duration_minutes: 60, price_from_cents: 0 },
           { name: "Sessão de tatuagem", kind: "session", duration_minutes: 180, price_from_cents: 350_00 },
@@ -124,8 +124,7 @@ module Api
         ])
 
         (1..5).each do |dow|
-          next if dow == 0
-          studio.working_hours.create!(artist_id: artist.id, day_of_week: dow, opens_at: "10:00", closes_at: "19:00")
+          studio.working_hours.create!(artist_id: nil, day_of_week: dow, opens_at: "10:00", closes_at: "19:00")
         end
       end
     end

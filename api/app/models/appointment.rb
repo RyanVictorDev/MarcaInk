@@ -2,8 +2,10 @@ class Appointment < ApplicationRecord
   belongs_to :studio
   belongs_to :artist, class_name: "User"
   belongs_to :service
+  has_many :notifications, dependent: :delete_all
 
   before_validation :set_cancel_token, on: :create
+  after_create_commit :notify_team
   before_validation :set_ends_at, on: :create
 
   validates :starts_at, presence: true
@@ -15,6 +17,12 @@ class Appointment < ApplicationRecord
   scope :for_range, ->(from, to) { where("starts_at < ? AND ends_at > ?", to, from) }
 
   private
+
+  def notify_team
+    return unless source == "public"
+
+    BookingNotifier.call(self)
+  end
 
   def customer_contact
     self.customer_name = customer_name.to_s.strip.gsub(/\s+/, " ")

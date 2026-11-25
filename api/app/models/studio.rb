@@ -5,6 +5,7 @@ class Studio < ApplicationRecord
   has_many :closed_days, dependent: :destroy
   has_many :blocks, dependent: :destroy
   has_many :appointments, dependent: :destroy
+  has_many :notifications, dependent: :delete_all
 
   validates :name, :slug, presence: true
   validates :slug, uniqueness: { message: "já está em uso" },
