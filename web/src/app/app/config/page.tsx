@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import { Field, TextField } from "@/components/ui/field";
 import { useToast } from "@/components/ui/toast";
 import { useStaff } from "@/components/staff-context";
@@ -267,20 +268,18 @@ export default function ConfigPage() {
                         <span className="text-sm">{hour.opens_at} até {hour.closes_at}</span>
                       ) : (
                       <div className="flex items-center gap-2 text-sm">
-                        <input
-                          aria-label={`${label} abre às`}
-                          type="time"
-                          className={timeClass}
+                        <TimePicker
+                          ariaLabel={`${label} abre às`}
+                          kicker="Abre"
                           value={hour.opens_at}
-                          onChange={(e) => updateHour(day, { opens_at: e.target.value })}
+                          onChange={(opens_at) => updateHour(day, { opens_at })}
                         />
                         <span className="text-muted">até</span>
-                        <input
-                          aria-label={`${label} fecha às`}
-                          type="time"
-                          className={timeClass}
+                        <TimePicker
+                          ariaLabel={`${label} fecha às`}
+                          kicker="Fecha"
                           value={hour.closes_at}
-                          onChange={(e) => updateHour(day, { closes_at: e.target.value })}
+                          onChange={(closes_at) => updateHour(day, { closes_at })}
                         />
                       </div>
                       )
