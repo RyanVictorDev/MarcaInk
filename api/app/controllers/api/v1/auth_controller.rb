@@ -2,7 +2,7 @@ module Api
   module V1
     class AuthController < ApplicationController
       def register
-        studio = nil
+        user = nil
         ActiveRecord::Base.transaction do
           studio = Studio.new(studio_params)
           studio.trial_ends_at = 14.days.from_now
@@ -10,27 +10,44 @@ module Api
           studio.cancellation_policy ||= default_policy
           studio.save!
 
-          owner = studio.users.build(
+          user = studio.users.create!(
             email: params[:email].to_s.downcase.strip,
             name: params[:owner_name].presence || params[:email],
             password: params[:password],
-            role: "owner"
+            role: "owner",
+            account_owner: true,
+            bookable: true,
+            color: "#f59e0b"
           )
-          owner.save!
 
-          seed_defaults!(studio, owner)
+          seed_defaults!(studio, user)
         end
 
-        user = studio.users.find_by!(role: "owner")
         render json: auth_payload(user), status: :created
       end
 
       def login
-        user = User.find_by("LOWER(email) = ?", params[:email].to_s.downcase.strip)
-        if user&.authenticate(params[:password])
+        matches = accounts_for(params[:email], params[:password])
+        if matches.empty?
+          render json: { error: "E-mail ou senha inválidos" }, status: :unauthorized
+        elsif matches.one?
+          render json: auth_payload(matches.first)
+        else
+          render json: {
+            choose_studio: true,
+            login_token: JsonWebToken.encode_choice(matches.map(&:id)),
+            studios: matches.map { |user| studio_choice(user) }
+          }
+        end
+      end
+
+      def choose_studio
+        ids = JsonWebToken.decode_choice(params[:login_token])
+        user = User.where(id: ids, active: true).find_by(id: params[:user_id])
+        if user && ids.include?(user.id)
           render json: auth_payload(user)
         else
-          render json: { error: "E-mail ou senha inválidos" }, status: :unauthorized
+          render json: { error: "Essa escolha expirou. Entre de novo." }, status: :unauthorized
         end
       end
 
@@ -42,6 +59,24 @@ module Api
       end
 
       private
+
+      def accounts_for(email, password)
+        normalized = email.to_s.downcase.strip
+        return [] if normalized.blank? || password.blank?
+
+        User.where(active: true).where("LOWER(email) = ?", normalized).includes(:studio).select do |user|
+          user.authenticate(password)
+        end.sort_by { |user| user.studio.name.to_s.downcase }
+      end
+
+      def studio_choice(user)
+        {
+          user_id: user.id,
+          name: user.studio.name,
+          slug: user.studio.slug,
+          role: user.role
+        }
+      end
 
       def studio_params
         params.require(:studio).permit(:name, :slug, :phone, :address, :instagram)
@@ -81,16 +116,7 @@ module Api
         "Cancelamentos devem ser feitos com pelo menos 24h de antecedência. Sessões confirmadas podem exigir sinal."
       end
 
-      def seed_defaults!(studio, owner)
-        artist = studio.users.create!(
-          name: "Artista convidado",
-          email: "artista+#{studio.slug}@marcaink.local",
-          password: SecureRandom.hex(16),
-          role: "artist",
-          color: "#f59e0b"
-        )
-        owner.update!(color: "#ea580c") if owner.color.blank?
-
+      def seed_defaults!(studio, artist)
         studio.services.create!([
           { name: "Consulta de projeto", kind: "consultation", duration_minutes: 60, price_from_cents: 0 },
           { name: "Sessão de tatuagem", kind: "session", duration_minutes: 180, price_from_cents: 350_00 },

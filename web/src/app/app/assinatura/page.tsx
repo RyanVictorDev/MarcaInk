@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/components/ui/toast";
 import { api, Studio } from "@/lib/api";
 import { getToken } from "@/lib/auth-store";
 import { statusLabel } from "@/lib/utils";
 
 export default function AssinaturaPage() {
+  const toast = useToast();
   const [studio, setStudio] = useState<Studio | null>(null);
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const token = getToken();
@@ -20,18 +21,22 @@ export default function AssinaturaPage() {
   async function activate(plan: string) {
     const token = getToken();
     if (!token) return;
-    const res = await api<{ mode: string; message: string; checkout_url?: string }>("/api/v1/billing/checkout", {
-      method: "POST",
-      token,
-      body: JSON.stringify({ plan }),
-    });
-    if (res.mode === "abacate" && res.checkout_url) {
-      window.location.href = res.checkout_url;
-      return;
+    try {
+      const res = await api<{ mode: string; message: string; checkout_url?: string }>("/api/v1/billing/checkout", {
+        method: "POST",
+        token,
+        body: JSON.stringify({ plan }),
+      });
+      if (res.mode === "abacate" && res.checkout_url) {
+        window.location.href = res.checkout_url;
+        return;
+      }
+      const me = await api<{ studio: Studio }>("/api/v1/studio", { token });
+      setStudio(me.studio);
+      toast.success("Assinatura atualizada", res.message);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível atualizar a assinatura.");
     }
-    setMessage(res.message);
-    const me = await api<{ studio: Studio }>("/api/v1/studio", { token });
-    setStudio(me.studio);
   }
 
   if (!studio) return <p className="text-muted">Carregando...</p>;
@@ -59,7 +64,6 @@ export default function AssinaturaPage() {
             </Button>
           ))}
         </div>
-        {message && <p className="text-sm text-accent">{message}</p>}
       </Card>
     </div>
   );

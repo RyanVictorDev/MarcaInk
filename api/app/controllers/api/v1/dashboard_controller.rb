@@ -9,6 +9,7 @@ module Api
         week_end = Time.current.in_time_zone(studio.timezone).end_of_week
 
         appts = studio.appointments.includes(:artist, :service)
+        appts = appts.where(artist_id: current_user.id) if current_user.artist?
 
         render json: {
           today_count: appts.where(starts_at: today).where(status: %w[pending confirmed]).count,

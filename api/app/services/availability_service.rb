@@ -8,6 +8,11 @@ class AvailabilityService
     @from_date = from_date.to_date
     @to_date = to_date.to_date
     @zone = ActiveSupport::TimeZone[studio.timezone] || Time.zone
+    studio_hours = studio.working_hours.where(artist_id: nil)
+    @using_studio_hours = studio_hours.exists?
+    source = @using_studio_hours ? studio_hours : studio.working_hours.where(artist_id: artist.id)
+    @hours = source.group_by(&:day_of_week)
+    @closed_days = studio.closed_days.where(day: @from_date..@to_date).pluck(:day)
   end
 
   def slots
@@ -44,8 +49,9 @@ class AvailabilityService
   private
 
   def hours_for(date)
-    day = date.wday
-    rows = @studio.working_hours.where(artist_id: [ @artist.id, nil ], day_of_week: day)
+    return [] if @closed_days.include?(date)
+
+    rows = @hours[date.wday] || []
     return [] if rows.empty?
 
     rows.map do |row|

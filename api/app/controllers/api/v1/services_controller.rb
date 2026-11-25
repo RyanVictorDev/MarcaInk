@@ -2,6 +2,7 @@ module Api
   module V1
     class ServicesController < ApplicationController
       before_action :authenticate!
+      before_action :require_manager!
       before_action :require_active_subscription!, except: [ :index ]
 
       def index

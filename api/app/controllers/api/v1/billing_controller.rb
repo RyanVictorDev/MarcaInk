@@ -2,6 +2,7 @@ module Api
   module V1
     class BillingController < ApplicationController
       before_action :authenticate!
+      before_action :require_owner!
 
       def checkout
         plan = params[:plan].presence || "solo"

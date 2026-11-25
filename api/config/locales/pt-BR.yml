@@ -30,6 +30,8 @@ pt-BR:
         kind: "Tipo"
         duration_minutes: "Duração"
         price_from_cents: "Preço"
+      closed_day:
+        day: "Esse dia"
       studio:
         name: "Nome do estúdio"
         slug: "Link"

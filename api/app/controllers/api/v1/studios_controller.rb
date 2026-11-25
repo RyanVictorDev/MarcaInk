@@ -2,6 +2,7 @@ module Api
   module V1
     class StudiosController < ApplicationController
       before_action :authenticate!
+      before_action :require_manager!, only: [ :update ]
 
       def show
         render json: { studio: studio_json(current_studio) }

@@ -4,7 +4,7 @@ module Api
       before_action :authenticate!
 
       def index
-        scope = current_studio.appointments.includes(:artist, :service).order(starts_at: :desc)
+        scope = visible_appointments.includes(:artist, :service).order(starts_at: :desc)
         scope = scope.where(status: params[:status]) if params[:status].present?
         if params[:from].present? && params[:to].present?
           scope = scope.where(starts_at: Time.zone.parse(params[:from])..Time.zone.parse(params[:to]))
@@ -13,12 +13,15 @@ module Api
       end
 
       def create
+        if current_user.artist?
+          params[:appointment][:artist_id] = current_user.id if params[:appointment].present?
+        end
         appointment = current_studio.appointments.create!(manual_params.merge(source: "manual", status: "confirmed"))
         render json: { appointment: appointment_json(appointment) }, status: :created
       end
 
       def update
-        appointment = current_studio.appointments.find(params[:id])
+        appointment = visible_appointments.find(params[:id])
         appointment.update!(params.require(:appointment).permit(:status, :notes, :starts_at))
         if appointment.saved_change_to_starts_at?
           appointment.update!(ends_at: appointment.starts_at + appointment.service.duration_minutes.minutes + current_studio.buffer_minutes.minutes)
@@ -27,6 +30,12 @@ module Api
       end
 
       private
+
+      def visible_appointments
+        scope = current_studio.appointments
+        scope = scope.where(artist_id: current_user.id) if current_user.artist?
+        scope
+      end
 
       def manual_params
         p = params.require(:appointment).permit(:artist_id, :service_id, :customer_name, :customer_email, :customer_phone, :notes, :starts_at)

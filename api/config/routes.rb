@@ -5,12 +5,15 @@ Rails.application.routes.draw do
     namespace :v1 do
       post "auth/register", to: "auth#register"
       post "auth/login", to: "auth#login"
+      post "auth/login/studio", to: "auth#choose_studio"
       get "auth/me", to: "auth#me"
 
       resource :dashboard, only: [ :show ], controller: "dashboard"
       resource :studio, only: [ :show, :update ]
+      resource :schedule, only: [ :show, :update ], controller: "schedule"
+      resources :closed_days, only: [ :create, :destroy ]
       resources :services, except: [ :show ]
-      resources :artists, only: [ :index, :create, :update ]
+      resources :artists, only: [ :index, :create, :update, :destroy ]
       resources :appointments, only: [ :index, :create, :update ]
       post "billing/checkout", to: "billing#checkout"
 

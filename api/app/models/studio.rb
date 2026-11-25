@@ -2,6 +2,7 @@ class Studio < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :services, dependent: :destroy
   has_many :working_hours, dependent: :destroy
+  has_many :closed_days, dependent: :destroy
   has_many :blocks, dependent: :destroy
   has_many :appointments, dependent: :destroy
 
@@ -20,7 +21,30 @@ class Studio < ApplicationRecord
   end
 
   def artists
-    users.where(role: "artist", active: true)
+    users.artists
+  end
+
+  def artist_limit
+    case plan
+    when "studio" then 5
+    when "pro" then nil
+    else 1
+    end
+  end
+
+  def artist_limit_reached?
+    limit = artist_limit
+    limit.present? && artists.count >= limit
+  end
+
+  def artist_limit_message
+    return if artist_limit.nil?
+
+    if plan == "studio"
+      "O plano Studio inclui até 5 tatuadores. O plano Pro libera a equipe inteira."
+    else
+      "O plano Solo inclui 1 tatuador. Para incluir mais gente, mude para Studio ou Pro."
+    end
   end
 
   private

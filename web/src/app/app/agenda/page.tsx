@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/components/ui/toast";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth-store";
+import { useStaff } from "@/components/staff-context";
 import { cn, formatDateTime, statusLabel } from "@/lib/utils";
 
 const STATUS_TONE: Record<string, { idle: string; active: string }> = {
@@ -35,6 +37,8 @@ type Appointment = {
 };
 
 export default function AgendaPage() {
+  const toast = useToast();
+  const { role } = useStaff();
   const [items, setItems] = useState<Appointment[]>([]);
 
   useEffect(() => {
@@ -45,20 +49,26 @@ export default function AgendaPage() {
 
   async function setStatus(id: number, status: string) {
     const token = getToken();
-    if (!token) return;
-    await api(`/api/v1/appointments/${id}`, {
-      method: "PATCH",
-      token,
-      body: JSON.stringify({ appointment: { status } }),
-    });
-    setItems((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+    const current = items.find((item) => item.id === id);
+    if (!token || !current || current.status === status) return;
+    try {
+      await api(`/api/v1/appointments/${id}`, {
+        method: "PATCH",
+        token,
+        body: JSON.stringify({ appointment: { status } }),
+      });
+      setItems((prev) => prev.map((a) => (a.id === id ? { ...a, status } : a)));
+      toast.success(`Marcado como ${statusLabel(status).toLowerCase()}`, current.customer_name);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível atualizar o status.");
+    }
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6">
       <div>
         <h1 className="text-3xl font-semibold">Agenda</h1>
-        <p className="text-muted">Gerencie status das sessões</p>
+        <p className="text-muted">{role === "artist" ? "Somente as suas sessões." : "Gerencie status das sessões"}</p>
       </div>
       <Card className="min-h-0 flex-1 space-y-3 overflow-y-auto">
         {items.length === 0 && <p className="text-sm text-muted">Sem agendamentos ainda.</p>}

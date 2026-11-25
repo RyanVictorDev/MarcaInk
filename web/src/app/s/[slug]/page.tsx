@@ -210,7 +210,7 @@ export default function PublicBookingPage() {
                 >
                   <p className="font-medium">{s.name}</p>
                   <p className="text-sm text-muted">
-                    {s.duration_minutes} min · {formatMoney(s.price_from_cents)}
+                    {s.duration_minutes} min · {s.price_from_cents ? `a partir de ${formatMoney(s.price_from_cents)}` : formatMoney(s.price_from_cents)}
                   </p>
                 </button>
               ))}

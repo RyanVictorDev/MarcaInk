@@ -7,10 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { api, DashboardData } from "@/lib/api";
 import { getToken } from "@/lib/auth-store";
+import { useStaff } from "@/components/staff-context";
 import { formatDateTime, statusLabel } from "@/lib/utils";
 
 export default function DashboardPage() {
+  const { role } = useStaff();
   const [data, setData] = useState<DashboardData | null>(null);
+  const ownAgenda = role === "artist";
 
   useEffect(() => {
     const token = getToken();
@@ -27,7 +30,7 @@ export default function DashboardPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold">Dashboard</h1>
-          <p className="text-muted">Visão rápida do estúdio</p>
+          <p className="text-muted">{ownAgenda ? "Visão da sua agenda" : "Visão rápida do estúdio"}</p>
         </div>
         <Link href={data.public_booking_url} target="_blank" rel="noopener noreferrer">
           <Button variant="outline">

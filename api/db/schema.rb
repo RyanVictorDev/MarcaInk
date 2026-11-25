@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_21_234000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_25_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -45,6 +45,16 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_21_234000) do
     t.index ["service_id"], name: "index_appointments_on_service_id"
     t.index ["studio_id", "starts_at"], name: "index_appointments_on_studio_id_and_starts_at"
     t.index ["studio_id"], name: "index_appointments_on_studio_id"
+  end
+
+  create_table "closed_days", force: :cascade do |t|
+    t.bigint "studio_id", null: false
+    t.date "day", null: false
+    t.string "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["studio_id", "day"], name: "index_closed_days_on_studio_id_and_day", unique: true
+    t.index ["studio_id"], name: "index_closed_days_on_studio_id"
   end
 
   create_table "blocks", force: :cascade do |t|
@@ -99,6 +109,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_21_234000) do
     t.string "role", default: "artist", null: false
     t.string "color", default: "#d97706", null: false
     t.boolean "active", default: true, null: false
+    t.boolean "account_owner", default: false, null: false
+    t.boolean "bookable", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["studio_id", "email"], name: "index_users_on_studio_id_and_email", unique: true
@@ -118,6 +130,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_21_234000) do
     t.index ["studio_id"], name: "index_working_hours_on_studio_id"
   end
 
+  add_foreign_key "closed_days", "studios"
   add_foreign_key "appointments", "services"
   add_foreign_key "appointments", "studios"
   add_foreign_key "appointments", "users", column: "artist_id"

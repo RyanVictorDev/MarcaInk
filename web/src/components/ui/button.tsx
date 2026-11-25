@@ -7,7 +7,7 @@ type Size = "sm" | "md" | "lg";
 
 function buttonClass(variant: Variant, size: Size, className?: string) {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-50",
+    "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
     size === "sm" && "px-3 py-1.5 text-sm",
     size === "md" && "px-4 py-2.5 text-sm",
     size === "lg" && "px-6 py-3 text-base",

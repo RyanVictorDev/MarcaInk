@@ -2,23 +2,33 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, CreditCard, LayoutDashboard, Menu, Scissors, Settings, X } from "lucide-react";
+import { LayoutDashboard, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
-const links = [
-  { href: "/app", label: "Início", icon: LayoutDashboard },
-  { href: "/app/agenda", label: "Agenda", icon: Calendar },
-  { href: "/app/servicos", label: "Serviços", icon: Scissors },
-  { href: "/app/assinatura", label: "Plano", icon: CreditCard },
-  { href: "/app/config", label: "Config", icon: Settings },
-];
+const SHORT: Record<string, string> = {
+  "/app": "Início",
+  "/app/agenda": "Agenda",
+  "/app/servicos": "Serviços",
+  "/app/tatuadores": "Equipe",
+  "/app/assinatura": "Plano",
+  "/app/config": "Config",
+};
 
-export function MobileNav() {
+const COLUMNS: Record<number, string> = {
+  3: "grid-cols-3",
+  5: "grid-cols-5",
+  6: "grid-cols-6",
+};
+
+type NavLink = { href: string; label: string; icon: typeof LayoutDashboard };
+
+export function MobileNav({ links }: { links: NavLink[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const columns = COLUMNS[links.length] ?? "grid-cols-3";
 
   return (
   <>
@@ -56,7 +66,7 @@ export function MobileNav() {
             )}
           >
             <Icon className="h-5 w-5" />
-            {label}
+            {SHORT[href] ?? label}
           </Link>
         ))}
       </nav>
@@ -64,10 +74,10 @@ export function MobileNav() {
 
     <nav
       aria-label="Navegação principal"
-      className="fixed bottom-0 left-0 right-0 z-30 border-t border-card-border bg-card/95 px-2 py-2 backdrop-blur md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-30 border-t border-card-border bg-card/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden"
     >
-      <ul className="grid grid-cols-5 gap-1">
-        {links.map(({ href, label, icon: Icon }) => (
+      <ul className={cn("grid gap-1", columns)}>
+        {links.map(({ href, icon: Icon }) => (
           <li key={href}>
             <Link
               href={href}
@@ -77,7 +87,7 @@ export function MobileNav() {
               )}
             >
               <Icon className="h-4 w-4" />
-              <span className="truncate">{label}</span>
+              <span className="truncate">{SHORT[href] ?? "Menu"}</span>
             </Link>
           </li>
         ))}

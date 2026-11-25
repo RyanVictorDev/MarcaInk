@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { Card } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Modal } from "@/components/ui/modal";
@@ -36,6 +37,7 @@ function isKind(value: string): value is Kind {
 }
 
 export default function ServicosPage() {
+  const toast = useToast();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -46,11 +48,9 @@ export default function ServicosPage() {
   const [duration, setDuration] = useState("60");
   const [price, setPrice] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Service | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     const token = getToken();
@@ -69,7 +69,6 @@ export default function ServicosPage() {
     setDuration("60");
     setPrice("");
     setFieldErrors({});
-    setFormError("");
   }
 
   const closeForm = useCallback(() => {
@@ -81,13 +80,11 @@ export default function ServicosPage() {
     setDuration("60");
     setPrice("");
     setFieldErrors({});
-    setFormError("");
   }, [saving]);
 
   const closeDelete = useCallback(() => {
     if (deleting) return;
     setPendingDelete(null);
-    setDeleteError("");
   }, [deleting]);
 
   function openCreate() {
@@ -98,7 +95,6 @@ export default function ServicosPage() {
     setDuration("60");
     setPrice("");
     setFieldErrors({});
-    setFormError("");
     setFormMode("create");
   }
 
@@ -110,7 +106,6 @@ export default function ServicosPage() {
     setDuration(String(service.duration_minutes));
     setPrice(service.price_from_cents ? (service.price_from_cents / 100).toFixed(2).replace(".", ",") : "");
     setFieldErrors({});
-    setFormError("");
     setFormMode("edit");
   }
 
@@ -127,7 +122,6 @@ export default function ServicosPage() {
     if (durationError) next.duration_minutes = durationError;
     if ("error" in parsedPrice) next.price_from_cents = parsedPrice.error;
     setFieldErrors(next);
-    setFormError("");
     if (Object.keys(next).length > 0 || "error" in parsedPrice) return;
 
     const payload = {
@@ -153,13 +147,14 @@ export default function ServicosPage() {
       );
       setSaving(false);
       clearForm();
+      toast.success(editingId ? "Serviço atualizado" : "Serviço criado", saved.service.name);
     } catch (err) {
       if (err instanceof ApiError && err.fields) {
         const mapped: Record<string, string> = {};
         for (const [key, messages] of Object.entries(err.fields)) mapped[key] = messages[0] ?? err.message;
         setFieldErrors(mapped);
       }
-      setFormError(err instanceof Error ? err.message : "Não foi possível salvar o serviço.");
+      toast.error(err instanceof Error ? err.message : "Não foi possível salvar o serviço.");
       setSaving(false);
     }
   }
@@ -168,14 +163,14 @@ export default function ServicosPage() {
     const token = getToken();
     if (!token || deleting || !pendingDelete) return;
     setDeleting(true);
-    setDeleteError("");
     try {
       await api(`/api/v1/services/${pendingDelete.id}`, { method: "DELETE", token });
       setServices((prev) => prev.filter((service) => service.id !== pendingDelete.id));
       setDeleting(false);
       setPendingDelete(null);
+      toast.success("Serviço excluído", pendingDelete.name);
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : "Não foi possível excluir o serviço.");
+      toast.error(err instanceof Error ? err.message : "Não foi possível excluir o serviço.");
       setDeleting(false);
     }
   }
@@ -216,7 +211,6 @@ export default function ServicosPage() {
                 variant="ghost"
                 onClick={() => {
                   closeForm();
-                  setDeleteError("");
                   setPendingDelete(service);
                 }}
               >
@@ -277,11 +271,6 @@ export default function ServicosPage() {
             hint="Deixe vazio para aparecer como sob consulta."
             onChange={(e) => setPrice(e.target.value)}
           />
-          {formError && (
-            <p role="alert" className="text-sm text-danger">
-              {formError}
-            </p>
-          )}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={closeForm} disabled={saving}>
               Cancelar
@@ -299,11 +288,6 @@ export default function ServicosPage() {
             ? `${pendingDelete.name} sai da lista e do link público. Horários já marcados com ele continuam na agenda.`
             : ""}
         </p>
-        {deleteError && (
-          <p role="alert" className="mt-3 text-sm text-danger">
-            {deleteError}
-          </p>
-        )}
         <div className="mt-6 flex justify-end gap-2">
           <Button type="button" variant="ghost" onClick={closeDelete} disabled={deleting}>
             Cancelar

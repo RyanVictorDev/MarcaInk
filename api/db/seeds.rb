@@ -16,6 +16,8 @@ if Rails.env.development? && Studio.none?
     email: "demo@marcaink.app",
     password: "demo12345",
     role: "owner",
+    account_owner: true,
+    bookable: false,
     color: "#ea580c"
   )
 

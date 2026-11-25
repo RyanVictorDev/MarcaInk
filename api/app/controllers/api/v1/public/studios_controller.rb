@@ -20,7 +20,7 @@ module Api
 
         def slots
           studio = Studio.find_by!(slug: params[:slug])
-          artist = studio.users.find(params[:artist_id])
+          artist = studio.artists.find(params[:artist_id])
           service = studio.services.active.find(params[:service_id])
           from = params[:from] ? Date.parse(params[:from]) : Date.current
           to = params[:to] ? Date.parse(params[:to]) : from + 13.days
@@ -35,7 +35,7 @@ module Api
             return render json: { error: "Estúdio indisponível para agendamento online." }, status: :service_unavailable
           end
 
-          artist = studio.users.find(booking_params[:artist_id])
+          artist = studio.artists.find(booking_params[:artist_id])
           service = studio.services.active.find(booking_params[:service_id])
           starts_at = Time.zone.parse(booking_params[:starts_at])
 

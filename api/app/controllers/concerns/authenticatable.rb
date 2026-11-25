@@ -19,4 +19,16 @@ module Authenticatable
 
     render json: { error: "Assinatura inativa. Regularize para continuar.", code: "subscription_inactive" }, status: :payment_required
   end
+
+  def require_manager!
+    return if current_user&.manager?
+
+    render json: { error: "Seu cargo não acessa esta área." }, status: :forbidden
+  end
+
+  def require_owner!
+    return if current_user&.owner?
+
+    render json: { error: "Só o dono pode fazer isso." }, status: :forbidden
+  end
 end
