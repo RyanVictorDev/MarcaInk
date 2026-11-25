@@ -1,5 +1,8 @@
 class User < ApplicationRecord
   has_secure_password
+  generates_token_for :password_reset, expires_in: 30.minutes do
+    password_digest.last(10)
+  end
 
   belongs_to :studio
   has_many :appointments, foreign_key: :artist_id, dependent: :restrict_with_error

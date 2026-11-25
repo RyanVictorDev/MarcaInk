@@ -6,6 +6,9 @@ Rails.application.routes.draw do
       post "auth/register", to: "auth#register"
       post "auth/login", to: "auth#login"
       post "auth/login/studio", to: "auth#choose_studio"
+      post "auth/password/forgot", to: "passwords#forgot"
+      get "auth/password/reset", to: "passwords#show"
+      post "auth/password/reset", to: "passwords#update"
       get "auth/me", to: "auth#me"
 
       resource :dashboard, only: [ :show ], controller: "dashboard"

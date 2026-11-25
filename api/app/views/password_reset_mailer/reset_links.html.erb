@@ -1,0 +1,9 @@
+<p>Alguém pediu uma senha nova para este e-mail no MarcaInk.</p>
+<p>Se não foi você, ignore esta mensagem. A senha atual continua valendo.</p>
+<% @links.each do |link| %>
+  <p>
+    <strong><%= link[:name] %></strong><br>
+    <a href="<%= link[:url] %>">Criar senha nova</a>
+  </p>
+<% end %>
+<p>O link vale por 30 minutos e só pode ser usado uma vez.</p>

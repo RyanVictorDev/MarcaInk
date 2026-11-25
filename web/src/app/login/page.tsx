@@ -73,6 +73,11 @@ export default function LoginPage() {
         <form className="mt-6 space-y-4" noValidate onSubmit={onSubmit}>
           <Field label="E-mail" name="email" type="email" autoComplete="email" inputMode="email" placeholder="nome@email.com" />
           <Field label="Senha" name="password" type="password" autoComplete="current-password" placeholder="Sua senha" />
+          <p className="text-right text-sm">
+            <Link href="/esqueci-senha" className="text-muted hover:text-accent">
+              Esqueci minha senha
+            </Link>
+          </p>
           {error && (
             <p role="alert" className="text-sm text-danger">
               {error}
