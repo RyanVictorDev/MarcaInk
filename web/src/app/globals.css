@@ -237,6 +237,27 @@ body::after {
   animation: ink-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.glass-panel {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    0 30px 80px -36px var(--shadow);
+}
+
+.glass-in {
+  animation: glass-rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes glass-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes toast-in {
   from {
     opacity: 0;

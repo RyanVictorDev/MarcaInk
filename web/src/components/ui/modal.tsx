@@ -42,12 +42,12 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
 
   return createPortal(
     <div className="fixed inset-0 z-[85] flex items-end justify-center sm:items-center sm:p-4">
-      <div className="absolute inset-0 bg-overlay backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] light:bg-[rgb(28_20_16/0.22)]" onClick={onClose} />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="stencil-in relative z-10 max-h-[min(92dvh,100%)] w-full overflow-y-auto overscroll-contain rounded-t-3xl border border-card-border bg-card p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_30px_80px_-40px_var(--shadow)] sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:p-6"
+        className="glass-in glass-panel relative z-10 max-h-[min(92dvh,100%)] w-full overflow-y-auto overscroll-contain rounded-t-3xl border border-white/15 bg-card/55 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] backdrop-blur-2xl backdrop-saturate-150 light:border-white/70 light:bg-card/70 sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:p-6"
       >
         <div className="mb-4 flex items-start justify-between gap-4 sm:mb-5">
           <h2 id={titleId} className="text-lg font-semibold">
