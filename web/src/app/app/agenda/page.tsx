@@ -55,12 +55,12 @@ export default function AgendaPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex min-h-0 flex-1 flex-col gap-6">
       <div>
         <h1 className="text-3xl font-semibold">Agenda</h1>
         <p className="text-muted">Gerencie status das sessões</p>
       </div>
-      <Card className="space-y-3">
+      <Card className="min-h-0 flex-1 space-y-3 overflow-y-auto">
         {items.length === 0 && <p className="text-sm text-muted">Sem agendamentos ainda.</p>}
         {items.map((a) => (
           <div key={a.id} className="flex flex-col gap-3 rounded-xl border border-card-border bg-surface-muted p-4 md:flex-row md:items-center md:justify-between">
