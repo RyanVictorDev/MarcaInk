@@ -222,7 +222,7 @@ export function BookingAlertsButton() {
     >
       <Bell className="h-4 w-4" />
       {alerts.unread > 0 && (
-        <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-fill px-1 text-[10px] font-semibold text-on-accent">
+        <span className="absolute right-px top-px flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-accent-fill px-0.5 text-[9px] font-semibold leading-none text-on-accent">
           {alerts.unread > 9 ? "9+" : alerts.unread}
         </span>
       )}
