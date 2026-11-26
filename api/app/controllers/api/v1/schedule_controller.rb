@@ -57,9 +57,7 @@ module Api
 
       def closed_days_json
         zone = ActiveSupport::TimeZone[current_studio.timezone] || Time.zone
-        current_studio.closed_days.where(day: zone.today..).order(:day).map do |closed|
-          { id: closed.id, day: closed.day.iso8601, note: closed.note }
-        end
+        current_studio.closed_days.where(day: zone.today..).order(:day, :starts_at).map(&:as_api)
       end
     end
   end

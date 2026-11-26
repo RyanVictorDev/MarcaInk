@@ -9,7 +9,9 @@ class AvailabilityService
     @to_date = to_date.to_date
     @zone = ActiveSupport::TimeZone[studio.timezone] || Time.zone
     @hours = schedule_for(studio, artist).group_by(&:day_of_week)
-    @closed_days = studio.closed_days.where(day: @from_date..@to_date).pluck(:day)
+    closures = studio.closed_days.where(day: @from_date..@to_date).to_a
+    @closed_days = closures.select(&:all_day?).map(&:day)
+    @windows = closures.reject(&:all_day?).group_by(&:day)
   end
 
   def slots
@@ -72,6 +74,8 @@ class AvailabilityService
   end
 
   def slot_free?(start_t, end_t)
+    return false if closure_overlaps?(start_t, end_t)
+
     appointments = @studio.appointments
       .where(artist_id: @artist.id)
       .where(status: %w[pending confirmed])
@@ -80,5 +84,14 @@ class AvailabilityService
 
     blocks = @studio.blocks.where(artist_id: @artist.id).where("starts_at < ? AND ends_at > ?", end_t, start_t)
     !blocks.exists?
+  end
+
+  def closure_overlaps?(start_t, end_t)
+    day = start_t.to_date
+    Array(@windows[day]).any? do |window|
+      cut_start = @zone.local(day.year, day.month, day.day, window.starts_at.hour, window.starts_at.min)
+      cut_end = @zone.local(day.year, day.month, day.day, window.ends_at.hour, window.ends_at.min)
+      start_t < cut_end && end_t > cut_start
+    end
   end
 end

@@ -8,7 +8,15 @@ import { Card } from "@/components/ui/card";
 import { api, DashboardData } from "@/lib/api";
 import { getToken } from "@/lib/auth-store";
 import { useStaff } from "@/components/staff-context";
-import { formatDateTime, statusLabel } from "@/lib/utils";
+import { cn, formatDateTime, statusLabel } from "@/lib/utils";
+
+function statusTone(status: string) {
+  if (status === "confirmed") return "border-emerald-400 bg-emerald-400 text-on-accent light:border-emerald-800 light:bg-emerald-800 light:text-white";
+  if (status === "completed") return "border-sky-400 bg-sky-400 text-on-accent light:border-sky-800 light:bg-sky-800 light:text-white";
+  if (status === "cancelled") return "border-rose-400 bg-rose-400 text-on-accent light:border-rose-800 light:bg-rose-800 light:text-white";
+  if (status === "no_show") return "border-violet-400 bg-violet-400 text-on-accent light:border-violet-800 light:bg-violet-800 light:text-white";
+  return "border-card-border text-muted";
+}
 
 export default function DashboardPage() {
   const { role } = useStaff();
@@ -63,18 +71,23 @@ export default function DashboardPage() {
             <p className="text-sm text-muted">Nenhum agendamento futuro. Compartilhe seu link público.</p>
           )}
           {data.upcoming.map((a) => (
-            <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-muted px-4 py-3 text-sm">
-              <div>
-                <p className="font-medium">{a.customer_name}</p>
-                <p className="text-muted">
-                  {a.service} · {a.artist}
-                </p>
-              </div>
-              <div className="text-right">
-                <p>{formatDateTime(a.starts_at)}</p>
-                <p className="text-accent">{statusLabel(a.status)}</p>
-              </div>
-            </div>
+            <Link
+              key={a.id}
+              href={`/app/agenda?sessao=${a.id}`}
+              className="flex items-center justify-between gap-3 rounded-xl bg-surface-muted px-4 py-3 text-left transition hover:bg-hover"
+            >
+              <span className="min-w-0">
+                <span className="block font-medium text-foreground">{a.customer_name}</span>
+                <span className="block truncate text-sm text-muted">
+                  {a.service}
+                  {ownAgenda ? "" : ` · ${a.artist}`}
+                </span>
+                <span className="mt-1 block text-sm text-foreground">{formatDateTime(a.starts_at)}</span>
+              </span>
+              <span className={cn("shrink-0 rounded-xl border px-2.5 py-1 text-xs font-medium", statusTone(a.status))}>
+                {statusLabel(a.status)}
+              </span>
+            </Link>
           ))}
         </div>
       </Card>

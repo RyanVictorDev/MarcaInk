@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_25_223000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_25_233000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -66,8 +66,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_223000) do
     t.string "note"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.time "starts_at"
+    t.time "ends_at"
     t.index ["studio_id", "day"], name: "index_closed_days_on_studio_id_and_day", unique: true
     t.index ["studio_id"], name: "index_closed_days_on_studio_id"
+    t.check_constraint "starts_at IS NULL AND ends_at IS NULL OR starts_at IS NOT NULL AND ends_at IS NOT NULL AND ends_at > starts_at", name: "closed_days_window"
   end
 
   create_table "notifications", force: :cascade do |t|

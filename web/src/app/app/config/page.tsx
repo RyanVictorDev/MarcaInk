@@ -30,7 +30,8 @@ type Studio = {
 };
 
 type Hour = { day_of_week: number; open: boolean; opens_at: string; closes_at: string };
-type ClosedDay = { id: number; day: string; note: string | null };
+type ClosedDay = { id: number; day: string; note: string | null; starts_at: string | null; ends_at: string | null };
+type ClosedScope = "day" | "time";
 
 const WEEK = [
   { day: 1, label: "Segunda" },
@@ -67,6 +68,9 @@ export default function ConfigPage() {
   const [closedDays, setClosedDays] = useState<ClosedDay[]>([]);
   const [closedDate, setClosedDate] = useState("");
   const [closedNote, setClosedNote] = useState("");
+  const [closedScope, setClosedScope] = useState<ClosedScope>("day");
+  const [closedFrom, setClosedFrom] = useState("12:00");
+  const [closedUntil, setClosedUntil] = useState("13:00");
 
   useEffect(() => {
     const token = getToken();
@@ -163,16 +167,27 @@ export default function ConfigPage() {
       toast.error("Escolha o dia.");
       return;
     }
+    if (closedScope === "time" && closedFrom >= closedUntil) {
+      toast.error("O horário final tem que ser depois do início.");
+      return;
+    }
     try {
       const created = await api<{ closed_day: ClosedDay }>("/api/v1/closed_days", {
         method: "POST",
         token,
-        body: JSON.stringify({ closed_day: { day: closedDate, note: closedNote.trim() } }),
+        body: JSON.stringify({
+          closed_day: {
+            day: closedDate,
+            note: closedNote.trim(),
+            starts_at: closedScope === "time" ? closedFrom : null,
+            ends_at: closedScope === "time" ? closedUntil : null,
+          },
+        }),
       });
-      setClosedDays((current) => [...current, created.closed_day].sort((a, b) => a.day.localeCompare(b.day)));
+      setClosedDays((current) => [...current, created.closed_day].sort((a, b) => a.day.localeCompare(b.day) || (a.starts_at ?? "").localeCompare(b.starts_at ?? "")));
       setClosedDate("");
       setClosedNote("");
-      toast.success("Dia fechado", created.closed_day.note || undefined);
+      toast.success(closedScope === "time" ? "Horário fechado" : "Dia fechado", created.closed_day.note || undefined);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Não foi possível fechar esse dia.");
     }
@@ -184,7 +199,7 @@ export default function ConfigPage() {
     try {
       await api(`/api/v1/closed_days/${id}`, { method: "DELETE", token });
       setClosedDays((current) => current.filter((day) => day.id !== id));
-      toast.success("Dia reaberto");
+      toast.success("Fechamento removido");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Não foi possível reabrir esse dia.");
     }
@@ -302,25 +317,55 @@ export default function ConfigPage() {
           <Card className="ink-frame">
             <h2 className="text-lg font-semibold">Dias fechados</h2>
             <p className="mt-1 text-sm text-muted">
-              {readOnly ? "Dias em que a loja não abre, mesmo estando na semana." : "Feriado, folga ou viagem. Esse dia some do link, mesmo estando na semana."}
+              {readOnly
+                ? "Dias ou horários em que a loja não atende, mesmo estando na semana."
+                : "Feriado, folga ou um horário específico. Some do link, mesmo estando na semana."}
             </p>
-            {!readOnly && <form className="mt-4 flex flex-wrap items-end gap-3" onSubmit={addClosedDay}>
-              <label className="text-sm text-muted">
-                Dia
-                <DatePicker className="mt-1.5" min={localToday()} value={closedDate} onChange={setClosedDate} />
-              </label>
-              <label className="min-w-48 flex-1 text-sm text-muted">
-                Motivo
-                <input
-                  type="text"
-                  maxLength={80}
-                  placeholder="Natal, folga, convenção"
-                  value={closedNote}
-                  onChange={(e) => setClosedNote(e.target.value)}
-                  className={`${timeClass} mt-1.5 block w-full`}
-                />
-              </label>
-              <Button type="submit">Fechar dia</Button>
+            {!readOnly && <form className="mt-4 space-y-3" onSubmit={addClosedDay}>
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Tipo de fechamento">
+                {([
+                  ["day", "Dia todo"],
+                  ["time", "Horário"],
+                ] as const).map(([scope, label]) => (
+                  <button
+                    key={scope}
+                    type="button"
+                    aria-pressed={closedScope === scope}
+                    className={cn(
+                      "rounded-lg px-3 py-1.5 text-sm font-medium transition",
+                      closedScope === scope ? "bg-accent-fill text-on-accent" : "text-muted hover:bg-hover hover:text-foreground"
+                    )}
+                    onClick={() => setClosedScope(scope)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-end gap-3">
+                <label className="text-sm text-muted">
+                  <span className="mb-1.5 block">Dia</span>
+                  <DatePicker min={localToday()} value={closedDate} onChange={setClosedDate} />
+                </label>
+                {closedScope === "time" && (
+                  <div className="flex items-center gap-2">
+                    <TimePicker ariaLabel="Fecha a partir de" kicker="Das" value={closedFrom} onChange={setClosedFrom} />
+                    <span className="text-sm text-muted">até</span>
+                    <TimePicker ariaLabel="Fecha até" kicker="Até" value={closedUntil} onChange={setClosedUntil} />
+                  </div>
+                )}
+                <label className="min-w-48 flex-1 text-sm text-muted">
+                  <span className="mb-1.5 block">Motivo</span>
+                  <input
+                    type="text"
+                    maxLength={80}
+                    placeholder="Natal, folga, convenção"
+                    value={closedNote}
+                    onChange={(e) => setClosedNote(e.target.value)}
+                    className={`${timeClass} block w-full`}
+                  />
+                </label>
+                <Button type="submit">{closedScope === "time" ? "Fechar horário" : "Fechar dia"}</Button>
+              </div>
             </form>}
             <ul className="mt-4 space-y-2">
               {closedDays.length === 0 && <li className="text-sm text-muted">Nenhum dia fechado pela frente.</li>}
@@ -332,11 +377,12 @@ export default function ConfigPage() {
                       day: "2-digit",
                       month: "short",
                     })}
+                    <span className="text-muted"> · {closed.starts_at && closed.ends_at ? `${closed.starts_at}–${closed.ends_at}` : "Dia todo"}</span>
                     {closed.note ? <span className="text-muted"> · {closed.note}</span> : null}
                   </span>
                   {!readOnly && (
-                  <button type="button" className="text-muted hover:text-foreground" onClick={() => removeClosedDay(closed.id)}>
-                    Reabrir
+                  <button type="button" className="shrink-0 text-muted hover:text-foreground" onClick={() => removeClosedDay(closed.id)}>
+                    Remover
                   </button>
                   )}
                 </li>

@@ -11,7 +11,7 @@ module Api
         scope = filtered_appointments
         total = scope.count
         page = page_number(total)
-        rows = scope.includes(:artist, :service).order(starts_at: period == "upcoming" ? :asc : :desc).offset((page - 1) * PER_PAGE).limit(PER_PAGE)
+        rows = scope.includes(:artist, :service).order(starts_at: sort_direction).offset((page - 1) * PER_PAGE).limit(PER_PAGE)
         render json: {
           appointments: rows.map { |appointment| appointment_json(appointment) },
           page: page,
@@ -56,6 +56,7 @@ module Api
         when "all" then scope
         else scope.where(starts_at: Time.current..)
         end
+        scope = on_day(scope)
         query = params[:q].to_s.strip.first(80)
         if query.present?
           term = "%#{ActiveRecord::Base.sanitize_sql_like(query)}%"
@@ -66,6 +67,28 @@ module Api
 
       def period
         PERIODS.include?(params[:period]) ? params[:period] : "upcoming"
+      end
+
+      def sort_direction
+        chosen_day || period == "upcoming" ? :asc : :desc
+      end
+
+      def chosen_day
+        raw = params[:on].to_s
+        return nil unless raw.match?(/\A\d{4}-\d{2}-\d{2}\z/)
+
+        Date.iso8601(raw)
+      rescue Date::Error
+        nil
+      end
+
+      def on_day(scope)
+        day = chosen_day
+        return scope unless day
+
+        zone = ActiveSupport::TimeZone[current_studio.timezone] || Time.zone
+        start_t = zone.local(day.year, day.month, day.day)
+        scope.where(starts_at: start_t...(start_t + 1.day))
       end
 
       def page_number(total)

@@ -256,7 +256,7 @@ export default function ArtistsPage() {
           />
           {canAssign && !artists.find((artist) => artist.id === editingId)?.account_owner && (
             <label className="block text-sm text-muted">
-              Cargo
+              <span className="mb-1.5 block">Cargo</span>
               <Select
                 value={form.role === "owner" ? "artist" : form.role}
                 options={ASSIGNABLE_ROLES}

@@ -120,7 +120,7 @@ export function Select({ id, value, options, onChange, invalid, placeholder = "S
             id={listId}
             role="listbox"
             style={{ top: box.top, left: box.left, width: box.width }}
-            className="fixed z-[80] overflow-hidden rounded-xl border border-card-border bg-menu p-1 shadow-[0_22px_50px_-20px_var(--shadow)]"
+            className="fixed z-[100] overflow-hidden rounded-xl border border-card-border bg-menu p-1 shadow-[0_22px_50px_-20px_var(--shadow)]"
           >
             {options.map((option, index) => {
               const chosen = option.value === value;

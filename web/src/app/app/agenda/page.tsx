@@ -2,6 +2,7 @@
 
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Modal } from "@/components/ui/modal";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
@@ -81,6 +82,7 @@ export default function AgendaPage() {
   const [artistId, setArtistId] = useState("");
   const [query, setQuery] = useState("");
   const [q, setQ] = useState("");
+  const [onDate, setOnDate] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const qRef = useRef("");
@@ -108,6 +110,7 @@ export default function AgendaPage() {
       if (status) params.set("status", status);
       if (artistId) params.set("artist_id", artistId);
       if (q) params.set("q", q);
+      if (onDate) params.set("on", onDate);
       setLoading(true);
       api<Page>(`/api/v1/appointments?${params}`, { token })
         .then((data) => {
@@ -133,7 +136,7 @@ export default function AgendaPage() {
       ignore = true;
       window.removeEventListener("marcaink:bookings-changed", load);
     };
-  }, [page, period, status, artistId, q, reloadKey, toast]);
+  }, [page, period, status, artistId, q, onDate, reloadKey, toast]);
 
   async function setAppointmentStatus(appointment: Appointment, next: string) {
     const token = getToken();
@@ -162,7 +165,25 @@ export default function AgendaPage() {
     setPage(1);
   }
 
-  const narrowed = Boolean(q || status || artistId);
+  function chooseDate(next: string) {
+    setOnDate(next);
+    if (next) setPeriod("all");
+    setPage(1);
+  }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = Number(params.get("sessao"));
+    if (!id) return;
+    const match = items.find((item) => item.id === id);
+    if (!match) return;
+    setSelected(match);
+    params.delete("sessao");
+    const next = params.toString();
+    window.history.replaceState(null, "", next ? `/app/agenda?${next}` : "/app/agenda");
+  }, [items]);
+
+  const narrowed = Boolean(q || status || artistId || (onDate && period !== "all"));
   const empty = !loading && items.length === 0;
   const rangeStart = total === 0 ? 0 : (page - 1) * 20 + 1;
   const rangeEnd = Math.min(page * 20, total);
@@ -175,14 +196,17 @@ export default function AgendaPage() {
       </div>
 
       <div className="sticky top-0 z-20 -mx-1 space-y-2 bg-background/95 px-1 py-2 backdrop-blur md:static md:mx-0 md:space-y-3 md:bg-transparent md:px-0 md:py-0 md:backdrop-blur-none">
-        <input
-          type="search"
-          value={query}
-          placeholder="Buscar cliente"
-          aria-label="Buscar cliente"
-          onChange={(event) => setQuery(event.target.value)}
-          className="w-full rounded-xl border border-card-border bg-surface px-3 py-2 text-sm text-foreground focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20 md:px-4 md:py-2.5"
-        />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <input
+            type="search"
+            value={query}
+            placeholder="Buscar cliente"
+            aria-label="Buscar cliente"
+            onChange={(event) => setQuery(event.target.value)}
+            className="w-full rounded-xl border border-card-border bg-surface px-3 py-2 text-sm text-foreground focus:border-accent/60 focus:outline-none focus:ring-2 focus:ring-accent/20 md:px-4 md:py-2.5"
+          />
+          <DatePicker value={onDate} onChange={chooseDate} placeholder="Qualquer data" />
+        </div>
         <div className="grid grid-cols-2 gap-2 md:hidden">
           <Select
             value={period}
@@ -237,7 +261,7 @@ export default function AgendaPage() {
         </div>
         {empty && (
           <p className="text-sm text-muted">
-            {narrowed ? "Nenhuma sessão com esses filtros." : period === "upcoming" ? "Nada pela frente." : period === "past" ? "Nenhuma sessão passada." : "Sem agendamentos ainda."}
+            {narrowed ? "Nenhuma sessão com esses filtros." : onDate ? "Nenhuma sessão nessa data." : period === "upcoming" ? "Nada pela frente." : period === "past" ? "Nenhuma sessão passada." : "Sem agendamentos ainda."}
           </p>
         )}
         {items.map((appointment) => (

@@ -239,7 +239,7 @@ export function TimePicker({ value, onChange, ariaLabel, kicker = "Horário", cl
             role="dialog"
             aria-label={ariaLabel}
             style={{ top: box.top, left: box.left, width: PANEL_WIDTH }}
-            className="fixed z-[80] overflow-hidden rounded-2xl border border-card-border bg-menu shadow-[0_22px_50px_-20px_var(--shadow)]"
+            className="fixed z-[100] overflow-hidden rounded-2xl border border-card-border bg-menu shadow-[0_22px_50px_-20px_var(--shadow)]"
           >
             <div className="flex items-end justify-between border-b border-card-border px-4 py-3">
               <div>

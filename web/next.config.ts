@@ -14,6 +14,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  async rewrites() {
+    const api = process.env.API_PROXY_URL?.replace(/\/$/, "") || "http://api:3041";
+    return [{ source: "/api/:path*", destination: `${api}/api/:path*` }];
+  },
   async headers() {
     return [
       {

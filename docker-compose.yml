@@ -56,6 +56,7 @@ services:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?defina NEXT_PUBLIC_API_URL no .env}
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      API_PROXY_URL: http://api:3041
     ports:
       - "${WEB_PORT:-3042}:3042"
     depends_on:

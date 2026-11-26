@@ -190,7 +190,7 @@ export function DatePicker({ id, value, onChange, min, placeholder = "dd/mm/aaaa
             aria-label="Escolher data"
             tabIndex={-1}
             style={{ top: box.top, left: box.left, width: POPOVER_WIDTH }}
-            className="fixed z-[80] rounded-2xl border border-card-border bg-menu p-3 shadow-[0_22px_50px_-20px_var(--shadow)] outline-none"
+            className="fixed z-[100] rounded-2xl border border-card-border bg-menu p-3 shadow-[0_22px_50px_-20px_var(--shadow)] outline-none"
             onKeyDown={onPanelKeyDown}
           >
             <div className="flex items-center justify-between gap-2 px-1">

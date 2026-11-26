@@ -1,9 +1,7 @@
 function resolveApiUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_API_URL?.trim();
-  if (!raw) {
-    return "";
-  }
-  return raw.replace(/\/$/, "");
+  const raw = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/$/, "") ?? "";
+  if (!raw || raw === "same-origin") return "";
+  return raw;
 }
 
 const API_URL = resolveApiUrl();
@@ -22,10 +20,6 @@ export async function api<T>(
   path: string,
   options: RequestInit & { token?: string | null } = {}
 ): Promise<T> {
-  if (!API_URL) {
-    throw new ApiError("API não configurada para este ambiente.", 503);
-  }
-
   const { token, headers, ...rest } = options;
   const res = await fetch(`${API_URL}${path}`, {
     ...rest,

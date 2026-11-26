@@ -7,7 +7,7 @@ module Api
 
       def create
         closed = current_studio.closed_days.create!(closed_day_params)
-        render json: { closed_day: { id: closed.id, day: closed.day.iso8601, note: closed.note } }, status: :created
+        render json: { closed_day: closed.as_api }, status: :created
       end
 
       def destroy
@@ -18,7 +18,7 @@ module Api
       private
 
       def closed_day_params
-        params.require(:closed_day).permit(:day, :note)
+        params.require(:closed_day).permit(:day, :note, :starts_at, :ends_at)
       end
     end
   end
